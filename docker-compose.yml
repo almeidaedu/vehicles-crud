@@ -5,6 +5,8 @@ services:
       - "3000:3000"
     depends_on:
       - rabbitmq
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
     volumes:
       - ./data:/usr/src/app/data
   rabbitmq:
