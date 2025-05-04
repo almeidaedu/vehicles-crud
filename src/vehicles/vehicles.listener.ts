@@ -1,40 +1,59 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { VehiclesService } from './vehicles.service';
+import { EventPattern, Payload } from '@nestjs/microservices';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { IVehicle } from './interfaces/vehicle.interface';
 
+//TODO usar um logger para registrar os eventos
+//Usei o console.log e console.error para demonstrar a aplicação do broker de mensagens
 @Controller()
 export class VehiclesListener {
-  constructor(private readonly vehiclesService: VehiclesService) {}
-
-  @MessagePattern('vehicle_created')
-  async handleVehicleCreated(@Payload() data: CreateVehicleDto) {
-    try {
-      return this.vehiclesService.create(data);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Error creating vehicle: ${message}`);
-    }
+  @EventPattern('vehicle_created')
+  handleVehicleCreated(@Payload() data: CreateVehicleDto) {
+    console.log('Vehicle created:', data);
   }
 
-  @MessagePattern('vehicle_updated')
-  async handleVehicleUpdated(
-    @Payload() data: { id: number; update: UpdateVehicleDto },
+  @EventPattern('vehicle_updated')
+  handleVehicleUpdated(
+    @Payload() data: { id: number; data: UpdateVehicleDto },
   ) {
-    return this.vehiclesService.update(data.id, data.update);
+    console.log('Vehicle updated:', data);
   }
 
-  @MessagePattern('vehicle_removed')
-  async handleVehicleRemoved(@Payload() id: number) {
-    return this.vehiclesService.remove(id);
+  @EventPattern('vehicle_removed')
+  handleVehicleRemoved(@Payload() id: number) {
+    console.log(`Vehicle removed with ID: ${id}`);
   }
 
-  //TODO use a logger instead of console.error
-  @MessagePattern('vehicle_creation_error')
+  @EventPattern('vehicle_crud_error')
   handleVehicleCreationError(
-    @Payload() data: { error: string; data: CreateVehicleDto },
+    @Payload()
+    errorData: {
+      path: string;
+      error: string;
+      data?: IVehicle;
+      id?: number;
+    },
   ) {
-    console.error(`Error creating vehicle: ${data.error}`, data.data);
+    const { path, error, data, id } = errorData;
+    if (!data) {
+      console.error(
+        `Error on vehicle service on ${path} route: ${error} ID: ${id}`,
+      );
+      return;
+    }
+    if (!id) {
+      console.error(
+        `Error on vehicle service on ${path} route: ${error}`,
+        data,
+      );
+      return;
+    }
+
+    console.error(
+      `Error on vehicle service on ${path} route: ${error}`,
+      id,
+      data,
+    );
   }
 }
