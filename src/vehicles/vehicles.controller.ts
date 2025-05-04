@@ -10,12 +10,12 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  HttpException,
 } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { ClientProxy } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
 
 @Controller('vehicles')
 export class VehiclesController {
@@ -36,31 +36,97 @@ export class VehiclesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createVehicleDto: CreateVehicleDto) {
-    return lastValueFrom(this.client.send('vehicle_created', createVehicleDto));
+  async create(@Body() createVehicleDto: CreateVehicleDto) {
+    try {
+      const newVehicle = await this.vehiclesService.create(createVehicleDto);
+      this.client.emit('vehicle_created', newVehicle);
+      return newVehicle;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.client.emit('vehicle_creation_error', {
+        path: 'Create',
+        error: message,
+        data: createVehicleDto,
+      });
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Houve um erro ao criar o veículo',
+        },
+        HttpStatus.BAD_REQUEST,
+        {
+          cause: new Error(message),
+        },
+      );
+    }
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateVehicleDto,
+    @Body() updateVehicleDto: UpdateVehicleDto,
   ) {
-    const msg = await lastValueFrom(
-      this.client.send<{ id: number; update: UpdateVehicleDto }, object>(
-        'vehicle_updated',
-        { id, update: dto },
-      ),
-    );
-    return { message: msg };
+    try {
+      const vehicle = await this.vehiclesService.findOne(id);
+      if (!vehicle) {
+        throw new Error('Vehicle not found');
+      }
+      const updatedVehicle = await this.vehiclesService.update(
+        id,
+        updateVehicleDto,
+      );
+      this.client.emit('vehicle_updated', updatedVehicle);
+      return updatedVehicle;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.client.emit('vehicle_crud_error', {
+        path: 'Update',
+        error: message,
+        data: updateVehicleDto,
+        id,
+      });
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Houve um erro ao atualizar o veículo',
+        },
+        HttpStatus.BAD_REQUEST,
+        {
+          cause: new Error(message),
+        },
+      );
+    }
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   async remove(@Param('id', ParseIntPipe) id: number) {
-    const msg = await lastValueFrom<string>(
-      this.client.send('vehicle_removed', id),
-    );
-    return { message: msg };
+    try {
+      const vehicle = await this.vehiclesService.findOne(id);
+      if (!vehicle) {
+        throw new Error('Vehicle not found');
+      }
+      await this.vehiclesService.remove(id);
+      this.client.emit('vehicle_removed', id);
+      return vehicle;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.client.emit('vehicle_crud_error', {
+        path: 'Remove',
+        error: message,
+        id,
+      });
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Houve um erro ao remover o veículo',
+        },
+        HttpStatus.BAD_REQUEST,
+        {
+          cause: new Error(message),
+        },
+      );
+    }
   }
 }
