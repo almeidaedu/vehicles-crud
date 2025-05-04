@@ -43,7 +43,7 @@ export class VehiclesController {
       return newVehicle;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      this.client.emit('vehicle_creation_error', {
+      this.client.emit('vehicle_crud_error', {
         path: 'Create',
         error: message,
         data: createVehicleDto,

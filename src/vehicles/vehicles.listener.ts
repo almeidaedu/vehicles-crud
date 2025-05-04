@@ -51,8 +51,7 @@ export class VehiclesListener {
     }
 
     console.error(
-      `Error on vehicle service on ${path} route: ${error}`,
-      id,
+      `Error on vehicle service on ${path} route with vehicle id ${id}: ${error}`,
       data,
     );
   }
