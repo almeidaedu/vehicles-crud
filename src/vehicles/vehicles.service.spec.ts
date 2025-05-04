@@ -8,7 +8,6 @@ import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
 const mockVehicle = {
-  id: 1,
   plate: 'ABC-1234',
   chassis: 'XYZ9876ABC1234567',
   renavam: '123456789',
@@ -67,13 +66,6 @@ describe('VehiclesService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should create a vehicle', async () => {
-    const result = await service.create(createDto);
-    expect(repo.create).toHaveBeenCalledWith(createDto);
-    expect(repo.save).toHaveBeenCalledWith(mockVehicle);
-    expect(result).toContain(`${mockVehicle.id}`);
-  });
-
   it('should return all vehicles', async () => {
     const result = await service.findAll();
     expect(repo.find).toHaveBeenCalled();
@@ -92,15 +84,27 @@ describe('VehiclesService', () => {
     expect(result).toEqual(mockVehicle);
   });
 
+  it('should create a vehicle', async () => {
+    const result = await service.create(createDto);
+    expect(repo.create).toHaveBeenCalledWith(createDto);
+    expect(repo.save).toHaveBeenCalledWith(mockVehicle);
+    expect(result).toEqual(mockVehicle);
+  });
+
   it('should update a vehicle', async () => {
+    (repo.findOne as jest.Mock)
+      .mockResolvedValueOnce(mockVehicle)
+      .mockResolvedValueOnce({ ...mockVehicle, ...updateDto });
+
     const result = await service.update(1, updateDto);
+
     expect(repo.update).toHaveBeenCalledWith(1, updateDto);
-    expect(result).toContain('updated');
+    expect(result).toEqual({ ...mockVehicle, ...updateDto });
   });
 
   it('should remove a vehicle', async () => {
     const result = await service.remove(1);
     expect(repo.delete).toHaveBeenCalledWith(1);
-    expect(result).toContain('removed');
+    expect(result).toEqual(`Vehicle removed with ID: 1`);
   });
 });
