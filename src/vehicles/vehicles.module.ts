@@ -6,6 +6,8 @@ import { VehiclesController } from './vehicles.controller';
 import { VehiclesService } from './vehicles.service';
 import { VehiclesListener } from './vehicles.listener';
 
+const rabbitUrl = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Vehicle]),
@@ -14,9 +16,8 @@ import { VehiclesListener } from './vehicles.listener';
         name: 'VEHICLES_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://rabbitmq:5672'],
+          urls: [rabbitUrl],
           queue: 'vehicles_queue',
-          queueOptions: { durable: false },
         },
       },
     ]),
