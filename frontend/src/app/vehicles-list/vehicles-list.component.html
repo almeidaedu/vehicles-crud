@@ -1,0 +1,94 @@
+<div class="vehicle-list-wrapper">
+  <header class="header">
+    <h2>Lista de Veículos</h2>
+  </header>
+
+  <!-- Create form -->
+  <form
+    *ngIf="showCreate"
+    [formGroup]="vehicleForm"
+    (ngSubmit)="onCreate()"
+    class="vehicle-form"
+  >
+    <div class="form-row">
+      <input formControlName="plate" placeholder="Placa" required />
+      <input formControlName="chassis" placeholder="Chassi" required />
+      <input formControlName="renavam" placeholder="Renavam" required />
+      <input formControlName="model" placeholder="Modelo" required />
+      <input formControlName="brand" placeholder="Marca" required />
+      <input formControlName="year" type="number" placeholder="Ano" required />
+      <button class="btn primary" type="submit" [disabled]="vehicleForm.invalid">
+        Criar
+      </button>
+    </div>
+  </form>
+
+  <!-- Vehicles table -->
+  <section class="table-container">
+    <table class="vehicle-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Placa</th>
+          <th>Chassi</th>
+          <th>Renavam</th>
+          <th>Modelo</th>
+          <th>Marca</th>
+          <th>Ano</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let v of vehicles">
+          <!-- Edit row -->
+          <tr *ngIf="editId === v.id" class="edit-row">
+            <td colspan="8">
+              <form
+                [formGroup]="vehicleForm"
+                (ngSubmit)="onUpdate(v.id)"
+                class="vehicle-form"
+              >
+                <div class="form-row">
+                  <input formControlName="plate" placeholder="Placa" required />
+                  <input formControlName="chassis" placeholder="Chassi" required />
+                  <input formControlName="renavam" placeholder="Renavam" required />
+                  <input formControlName="model" placeholder="Modelo" required />
+                  <input formControlName="brand" placeholder="Marca" required />
+                  <input formControlName="year" type="number" placeholder="Ano" required />
+                  <button class="btn primary" type="submit" [disabled]="vehicleForm.invalid">
+                    Salvar
+                  </button>
+                  <button
+                    class="btn secondary"
+                    type="button"
+                    (click)="cancelEdit()"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </td>
+          </tr>
+
+          <!-- Display row -->
+          <tr *ngIf="editId !== v.id">
+            <td>{{ v.id }}</td>
+            <td>{{ v.plate }}</td>
+            <td>{{ v.chassis }}</td>
+            <td>{{ v.renavam }}</td>
+            <td>{{ v.model }}</td>
+            <td>{{ v.brand }}</td>
+            <td>{{ v.year }}</td>
+            <td class="actions">
+              <button class="btn small" (click)="startEdit(v)">Editar</button>
+              <button class="btn danger small" (click)="onDelete(v.id)">Excluir</button>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </section>
+  <button class="btn primary" (click)="showCreate = !showCreate">
+    {{ showCreate ? 'Cancelar' : 'Novo Veículo' }}
+  </button>
+</div>

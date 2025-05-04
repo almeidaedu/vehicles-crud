@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&family=Roboto:wght@400;500;700&display=swap');
+
+.vehicle-list-wrapper {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-family: 'Roboto', sans-serif;
+
+  h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1.8rem;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.table-container + .btn.primary {
+  margin-top: 0.5rem;
+}
+
+.vehicle-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Open Sans', sans-serif;
+  color: #444;
+
+  thead {
+    background-color: #007bff;
+    th {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+  }
+
+  tbody {
+    tr {
+      transition: background 0.2s ease-in-out;
+      &:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      &:hover {
+        background-color: #e9ecef;
+      }
+      td {
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #e0e0e0;
+      }
+    }
+  }
+}
+
+.vehicle-form {
+  margin: 1rem 0;
+  .form-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    input {
+      flex: 1 1 100px;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  }
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  &.primary { background: #007bff; color: #fff; }
+  &.secondary { background: #6c757d; color: #fff; }
+  &.danger { background: #dc3545; color: #fff; }
+  &.small { font-size: 0.85rem; padding: 0.25rem 0.5rem; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.actions {
+  display: flex;
+  gap: 0.25rem;
+}
