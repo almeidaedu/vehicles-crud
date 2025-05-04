@@ -21,6 +21,8 @@ RUN mkdir -p data && chmod 777 data
 
 RUN npm run build
 
+RUN node -e "console.log('SQLite3 version:', require('sqlite3').VERSION)"
+
 EXPOSE 3000
 
 CMD ["npm", "run", "start:prod"]
